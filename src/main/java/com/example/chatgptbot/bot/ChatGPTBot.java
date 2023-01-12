@@ -6,6 +6,7 @@ import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.completion.CompletionResult;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -53,6 +54,7 @@ public class ChatGPTBot extends TelegramLongPollingBot {
             if (text.equals("/start")) {
                 execute(botService.start(update, chatId, message.getFrom().getFirstName()));
             } else {
+                LoggerFactory.getLogger(ChatGPTBot.class).info("Received message: " + text + " from " + chatId + " " + message.getFrom().getFirstName());
                 OpenAiService service = new OpenAiService(openAiToken);
                 CompletionRequest completionRequest = CompletionRequest.builder()
                         .prompt(text)
@@ -68,6 +70,7 @@ public class ChatGPTBot extends TelegramLongPollingBot {
                     execute(botService.sendMessage(chatId, completion.getChoices().get(0).getText()));
                 }
                 catch (Exception e) {
+                    LoggerFactory.getLogger(ChatGPTBot.class).error(e.getMessage());
                     execute(botService.sendMessage(chatId, "Sorry for the inconvenience, internet connection is not stable. Please try again."));
                 }
 
